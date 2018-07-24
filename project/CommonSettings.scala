@@ -18,8 +18,8 @@
   * limitations under the License.
   */
 
-import com.lightbend.cinnamon.sbt.Cinnamon
-import com.lightbend.sbt.javaagent.JavaAgent.JavaAgentKeys
+//import com.lightbend.cinnamon.sbt.Cinnamon
+//import com.lightbend.sbt.javaagent.JavaAgent.JavaAgentKeys
 import sbt.Keys._
 import sbt._
 import sbtassembly._
@@ -52,25 +52,25 @@ object CommonSettings {
 
   lazy val configure: Project => Project = (proj: Project) => {
     proj
-    .enablePlugins(Cinnamon)
+//    .enablePlugins(Cinnamon)
     .settings(CommonSettings.commonSettings: _*)
-    .settings(
-      libraryDependencies += Cinnamon.library.cinnamonPrometheus,
-      libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer,
-      libraryDependencies += Cinnamon.library.cinnamonAkkaHttp,
-      libraryDependencies += Cinnamon.library.cinnamonOpenTracingZipkin,
-      AssemblyKeys.assembly := Def.task {
-        JavaAgentKeys.resolvedJavaAgents.value.filter(_.agent.name == "Cinnamon").foreach { agent =>
-          sbt.IO.copyFile(agent.artifact, target.value / "cinnamon-agent.jar")
-        }
-        AssemblyKeys.assembly.value
-      }.value,
-      assemblyMergeStrategy in assembly := {
-        case "cinnamon-reference.conf" => MergeStrategy.concat
-        case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
-          oldStrategy(x)
-      }
-    )
+//    .settings(
+//      libraryDependencies += Cinnamon.library.cinnamonPrometheus,
+//      libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer,
+//      libraryDependencies += Cinnamon.library.cinnamonAkkaHttp,
+//      libraryDependencies += Cinnamon.library.cinnamonOpenTracingZipkin,
+//      AssemblyKeys.assembly := Def.task {
+//        JavaAgentKeys.resolvedJavaAgents.value.filter(_.agent.name == "Cinnamon").foreach { agent =>
+//          sbt.IO.copyFile(agent.artifact, target.value / "cinnamon-agent.jar")
+//        }
+//        AssemblyKeys.assembly.value
+//      }.value,
+//      assemblyMergeStrategy in assembly := {
+//        case "cinnamon-reference.conf" => MergeStrategy.concat
+//        case x =>
+//          val oldStrategy = (assemblyMergeStrategy in assembly).value
+//          oldStrategy(x)
+//      }
+//    )
   }
 }
