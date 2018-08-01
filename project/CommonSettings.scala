@@ -19,12 +19,13 @@
   */
 
 import com.lightbend.cinnamon.sbt.Cinnamon
-import com.lightbend.sbt.javaagent.JavaAgent.JavaAgentKeys
 import sbt.Keys._
 import sbt._
-import sbtassembly._
 import sbtstudent.AdditionalSettings
-import AssemblyKeys.{assemblyMergeStrategy, assembly}
+
+import com.typesafe.sbt.packager.archetypes.JavaAppPackaging
+import com.typesafe.sbt.packager.archetypes.JavaAppPackaging.autoImport.{ scriptClasspathOrdering }
+import com.typesafe.sbt.packager.universal.UniversalPlugin.autoImport.{ useNativeZip, Universal }
 
 object CommonSettings {
   lazy val commonSettings = Seq(
@@ -40,7 +41,6 @@ object CommonSettings {
     parallelExecution in GlobalScope := false,
     parallelExecution in ThisBuild := false,
     fork in Test := false,
-    test in assembly := {},
     libraryDependencies ++= Dependencies.dependencies,
     credentials += Credentials(Path.userHome / ".lightbend" / "commercial.credentials"),
     resolvers += "com-mvn" at "https://repo.lightbend.com/commercial-releases/",
@@ -52,25 +52,13 @@ object CommonSettings {
 
   lazy val configure: Project => Project = (proj: Project) => {
     proj
-    .enablePlugins(Cinnamon)
+    .enablePlugins(Cinnamon, JavaAppPackaging)
     .settings(CommonSettings.commonSettings: _*)
     .settings(
       libraryDependencies += Cinnamon.library.cinnamonPrometheus,
       libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer,
       libraryDependencies += Cinnamon.library.cinnamonAkkaHttp,
-      libraryDependencies += Cinnamon.library.cinnamonOpenTracingZipkin,
-      AssemblyKeys.assembly := Def.task {
-        JavaAgentKeys.resolvedJavaAgents.value.filter(_.agent.name == "Cinnamon").foreach { agent =>
-          sbt.IO.copyFile(agent.artifact, target.value / "cinnamon-agent.jar")
-        }
-        AssemblyKeys.assembly.value
-      }.value,
-      assemblyMergeStrategy in assembly := {
-        case "cinnamon-reference.conf" => MergeStrategy.concat
-        case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
-          oldStrategy(x)
-      }
+      libraryDependencies += Cinnamon.library.cinnamonOpenTracingZipkin
     )
   }
 }
