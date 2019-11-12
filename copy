@@ -1,23 +1,34 @@
 #!/bin/bash
 
+######################################################################
+#
+# Copy jar for a given exercise to all nodes or a specific single node
+#
+# Usage:
+#   ./copy exercise_nr [node-nr]
+#
 # Set CLUSTER_NR to the number of the cluster you're working with
-CLUSTER_NR_SEL=${CLUSTER_NR:?Set environment variable CLUSTER_NR to your cluster number}
+# Default value of CLUSTER_NR is 0
+######################################################################
+
+CLUSTER_NR_SEL=${CLUSTER_NR:-0}
 
 CLUSTER_BASE_NODE_NR=$(expr $CLUSTER_NR_SEL \* 5)
 
 PI_USER=akkapi
 EXERCISE_NR=`printf %03d $1`
-FATJAR=`ls exercise*${EXERCISE_NR}*/target/scala-2.12/exercise*${EXERCISE_NR}*jar`
-CINNAMON=`ls exercise*${EXERCISE_NR}*/target/cinnamon-agent.jar`
+FATJAR=`ls exercise*${EXERCISE_NR}*/target/scala-2.1[23]/exercise*${EXERCISE_NR}*jar`
+
+if [ -f exercise*${EXERCISE_NR}*/target/cinnamon-agent.jar ];then
+  CINNAMON=`ls exercise*${EXERCISE_NR}*/target/cinnamon-agent.jar`
+fi
+
 ALL_NODES="0 1 2 3 4"
 SELECTED_NODE=$2
 NODES=${SELECTED_NODE:-$ALL_NODES}
-echo "Using $FATJAR"
 
 for i in $NODES;do
   node=$[ CLUSTER_BASE_NODE_NR + i ]
-  echo "Copy $FATJAR to node-${node}"
-  scp $FATJAR ${PI_USER}@node-${node}:/home/${PI_USER}
-  echo "Copy $CINNAMON to node-${node}"
-  scp $CINNAMON ${PI_USER}@node-${node}:/home/${PI_USER}
+  echo "Copy $FATJAR $CINNAMON to node-${node}"
+  scp $FATJAR ${CINNAMON-} ${PI_USER}@node-${node}:/home/${PI_USER}
 done

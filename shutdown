@@ -1,0 +1,28 @@
+#!/bin/bash
+
+######################################################################
+#
+# Shut down all cluster nodes or a specific node
+#
+# Usage:
+#   ./shutdownAll [node-nr]
+#
+# Set CLUSTER_NR to the number of the cluster you're working with
+# Default value of CLUSTER_NR is 0
+######################################################################
+
+CLUSTER_NR_SEL=${CLUSTER_NR:-0}
+
+CLUSTER_BASE_NODE_NR=$(expr $CLUSTER_NR_SEL \* 5)
+
+PI_USER=akkapi
+
+ALL_NODES="0 1 2 3 4"
+SELECTED_NODE=$1
+NODES=${SELECTED_NODE:-$ALL_NODES}
+
+for i in $NODES;do
+  node=$[ CLUSTER_BASE_NODE_NR + i ]
+  echo "Shutting down node-${node}"
+  ssh ${PI_USER}@node-${node} "sudo /sbin/shutdown -h now &"
+done
